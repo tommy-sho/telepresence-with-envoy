@@ -46,6 +46,8 @@ func main() {
 		}()
 		t := time.NewTimer(10 * time.Second)
 		select {
+		case <-gracefulStopChan:
+			log.Print("Success graceful stop")
 		case <-t.C:
 			server.Stop()
 		}
