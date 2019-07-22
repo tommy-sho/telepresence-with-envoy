@@ -8,6 +8,7 @@ proto:
 	--go_out=plugins=grpc:. \
     ./proto/*.proto
 	cp ./proto/*.pb.go backend/genproto
+	cp ./proto/*.pb.go gateway/genproto
 
 
 image-build:

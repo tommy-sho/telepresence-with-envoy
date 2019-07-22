@@ -3,7 +3,7 @@ syntax = "proto3";
 package proto;
 
 service BackendServer {
-    rpc Message(MessageRequest) returns (MessageResponse) {}
+    rpc mv (MessageRequest) returns (MessageResponse) {}
 }
 
 message MessageRequest {

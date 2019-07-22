@@ -18,6 +18,15 @@ const (
 	port = "50002"
 )
 
+type Request struct {
+	Name string `json:"name" form:"name" query:"name"`
+}
+
+type Responce struct {
+	Message  string `json:"message"`
+	DateTime int64  `json:"datetime"`
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -54,8 +63,27 @@ func main() {
 	}
 }
 
-func Greeting(clinet proto.BackendServerClient) echo.HandlerFunc {
-	return func(c echo.Context) error { //c をいじって Request, Responseを色々する
-		return c.String(http.StatusOK, "Hello World")
+func Greeting(client proto.BackendServerClient) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		r := new(Request)
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+
+		ctx := context.Background()
+		req := &proto.MessageRequest{
+			Name: r.Name,
+		}
+		m, err := client.Message(ctx, req)
+		if err != nil {
+			return err
+		}
+
+		res := Responce{
+			Message:  m.Message,
+			DateTime: m.Datetime,
+		}
+
+		return c.JSON(http.StatusOK, res)
 	}
 }
