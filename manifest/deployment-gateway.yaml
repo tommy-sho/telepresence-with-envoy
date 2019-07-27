@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: gateway
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gateway
@@ -19,33 +19,42 @@ spec:
       containers:
         - name: envoy
           image: envoyproxy/envoy:latest
+          imagePullPolicy: IfNotPresent
           command:
             - "/usr/local/bin/envoy"
           args:
             - "--config-path /etc/envoy/envoy.yaml"
           resources:
             limits:
-              memory: 512Mi
+              memory: 64Mi
           volumeMounts:
             - name: envoy-config
               mountPath: /etc/envoy
           ports:
-            - containerPort: 8080
+            - containerPort: 10000
               name: app
             - containerPort: 8001
               name: envoy-admin
         - name: server
-          image: gcr.io/my-first-project-236315/grpc-test/gateway
+          image: micro-service/gateway:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 50002
-          readinessProbe:
-            exec:
-              command: ["/bin/grpc_health_probe", "-addr=:50002"]
-            initialDelaySeconds: 5
           livenessProbe:
-            exec:
-              command: ["/bin/grpc_health_probe", "-addr=:50002"]
-            initialDelaySeconds: 10
+            httpGet:
+              path: /healthz
+              port: 50002
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 50002
+              httpHeaders:
+                - name: "X-Liveness-Header"
+                  value: "OK"
+            initialDelaySeconds: 3
+            periodSeconds: 3
           env:
             - name: BACKEND_PORT
               value: "localhost:50001"
@@ -58,20 +67,5 @@ spec:
               cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 200m
-              memory: 128Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: gateway-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: gateway
-  ports:
-    - name: "grpc"
-      protocol: "TCP"
-      port: 10000
-      nodePort: 31000
-      targetPort: 10000
+              cpu: 100m
+              memory: 64Mi

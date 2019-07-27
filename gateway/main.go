@@ -22,7 +22,7 @@ type Request struct {
 	Name string `json:"name" form:"name" query:"name"`
 }
 
-type Responce struct {
+type Response struct {
 	Message  string `json:"message"`
 	DateTime int64  `json:"datetime"`
 }
@@ -39,6 +39,7 @@ func main() {
 
 	e := echo.New()
 	e.GET("/greeting", Greeting(bClient))
+	e.GET("/healthz", Pong)
 
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan,
@@ -79,11 +80,15 @@ func Greeting(client proto.BackendServerClient) echo.HandlerFunc {
 			return err
 		}
 
-		res := Responce{
+		res := Response{
 			Message:  m.Message,
 			DateTime: m.Datetime,
 		}
 
 		return c.JSON(http.StatusOK, res)
 	}
+}
+
+func Pong(c echo.Context) error {
+	return c.String(http.StatusOK, "pong")
 }

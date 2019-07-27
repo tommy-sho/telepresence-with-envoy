@@ -1,28 +1,34 @@
 
+PROJECT  := $(shell gcloud projects list| sed -n 2P |cut -d' ' -f1)
+ZONE     := asia-northeast1-c
+CLUSTER  := telepresence-cluster
 SERVICES := gateway backend
 
-.PHONY: proto image-build push apply delete
+.PHONY: proto image-build apply delete
 
 proto:
 	protoc  \
 	--go_out=plugins=grpc:. \
     ./proto/*.proto
-	cp ./proto/*.pb.go backend/genproto
-	cp ./proto/*.pb.go gateway/genproto
 
+init:
+	gcloud container clusters create ${CLUSTER} --zone=${ZONE} --num-nodes=3 --preemptible
+	gcloud container clusters get-credentials ${CLUSTER} --zone=${ZONE}
 
-image-build:
+build:
 	for service in ${SERVICES}; do \
-		docker image build -t gcr.io/my-first-project-236315/grpc-test/$$service:latest $$service/; \
+		docker image build -t micro-service/$$service:latest $$service/; \
 	done
 
-push:
+push: build
 	for service in ${SERVICES}; do \
-		docker push gcr.io/my-first-project-236315/grpc-test/$$service:latest; \
+		docker tag micro-service/$$service:latest gcr.io/${PROJECT}/telepresence/$$service:latest;\
+		docker push gcr.io/${PROJECT}/telepresence/$$service:latest;\
+		sed -i "" -e 's/micro-service/gcr.io\/${PROJECT}\/telepresence/g' ./manifest/deployment-$$service.yaml; \
 	done
 
 apply:
-	kubectl apply -f kubernetes-manifest/deployment-and-service
+	kubectl apply -f manifest/
 
 delete:
-	kubectl delete -f kubernetes-manifest/deployment-and-service
+	kubectl delete -f manifest/
