@@ -84,7 +84,7 @@ data:
           healthy_threshold: 2
           tcp_health_check: {}
         load_assignment:
-          cluster_name: some_service
+          cluster_name: service
           endpoints:
           - lb_endpoints:
             - endpoint:

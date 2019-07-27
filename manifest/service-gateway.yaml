@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: gateway-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: gateway
   ports:
     - name: "http-port"
       protocol: "TCP"
+      nodePort: 31000
       targetPort: 50002
       port: 10000
