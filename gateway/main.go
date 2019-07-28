@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/labstack/echo"
 	"github.com/tommy-sho/telepresence-with-envoy/proto"
@@ -24,16 +25,18 @@ type Request struct {
 
 type Response struct {
 	Message  string `json:"message"`
-	DateTime int64  `json:"datetime"`
+	DateTime string `json:"datetime"`
 }
 
 func main() {
 	ctx := context.Background()
 
-	bConn, err := grpc.DialContext(ctx, os.Getenv("BACKEND_PORT"), grpc.WithInsecure())
+	bConn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%s", os.Getenv("BACKEND_HOST"), os.Getenv("BACKEND_PORT")), grpc.WithInsecure())
 	if err != nil {
 		panic(fmt.Errorf("failed to connect with backend server error : %v ", err))
 	}
+
+	fmt.Printf("%s:%s", os.Getenv("MY_POD_IP"), os.Getenv("BACKEND_PORT"))
 
 	bClient := proto.NewBackendServerClient(bConn)
 
@@ -77,14 +80,14 @@ func Greeting(client proto.BackendServerClient) echo.HandlerFunc {
 		}
 		m, err := client.Message(ctx, req)
 		if err != nil {
-			return err
+			log.Printf("failed to access to backend service")
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		res := Response{
 			Message:  m.Message,
-			DateTime: m.Datetime,
+			DateTime: time.Unix(m.Datetime, 0).String(),
 		}
-
 		return c.JSON(http.StatusOK, res)
 	}
 }

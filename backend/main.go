@@ -67,7 +67,7 @@ func main() {
 type BackendServer struct{}
 
 func (b *BackendServer) Message(ctx context.Context, req *proto.MessageRequest) (*proto.MessageResponse, error) {
-	message := fmt.Sprintf("Hey! %s", req.Name)
+	message := fmt.Sprintf("Hey! %s, What'up!!", req.Name)
 	currentTime := time.Now()
 
 	res := &proto.MessageResponse{

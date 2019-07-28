@@ -70,10 +70,8 @@ data:
               http_filters:
               - name: envoy.router
                 config: {}
-
       clusters:
       - name: gateway_server
-        http2_protocol_options: {}
         connect_timeout: 0.25s
         type: static
         lb_policy: round_robin
@@ -84,7 +82,7 @@ data:
           healthy_threshold: 2
           tcp_health_check: {}
         load_assignment:
-          cluster_name: service
+          cluster_name: gateway_service
           endpoints:
           - lb_endpoints:
             - endpoint:
@@ -104,7 +102,7 @@ data:
           healthy_threshold: 2
           tcp_health_check: {}
         load_assignment:
-          cluster_name: some_service
+          cluster_name: backend_service
           endpoints:
           - lb_endpoints:
             - endpoint:

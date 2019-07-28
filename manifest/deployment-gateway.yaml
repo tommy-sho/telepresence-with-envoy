@@ -19,7 +19,6 @@ spec:
       containers:
         - name: envoy
           image: envoyproxy/envoy:latest
-          imagePullPolicy: IfNotPresent
           command:
             - "/usr/local/bin/envoy"
           args:
@@ -36,8 +35,7 @@ spec:
             - containerPort: 8001
               name: envoy-admin
         - name: server
-          image: micro-service/gateway:latest
-          imagePullPolicy: Never
+          image: gcr.io/my-first-project-236315/telepresence/gateway:latest
           ports:
             - containerPort: 50002
           livenessProbe:
@@ -56,8 +54,10 @@ spec:
             initialDelaySeconds: 3
             periodSeconds: 3
           env:
+            - name: BACKEND_HOST
+              value: "localhost"
             - name: BACKEND_PORT
-              value: "localhost:50001"
+              value: "50001"
             - name: MY_POD_IP
               valueFrom:
                 fieldRef:
