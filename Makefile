@@ -12,7 +12,6 @@ proto:
     ./proto/*.proto
 
 init:
-	gcloud container clusters create ${CLUSTER} --zone=${ZONE} --num-nodes=3 --preemptible
 	gcloud container clusters get-credentials ${CLUSTER} --zone=${ZONE}
 
 build:

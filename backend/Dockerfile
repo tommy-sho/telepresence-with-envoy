@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine as builder
+FROM golang:1.14.1-alpine as builder
 RUN apk add --no-cache ca-certificates git
 ENV PROJECT /github.com/tommy-sho/k8s-grpc-health-check/backend
 WORKDIR /go/src/$PROJECT
