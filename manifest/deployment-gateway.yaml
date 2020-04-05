@@ -35,7 +35,7 @@ spec:
             - containerPort: 8001
               name: envoy-admin
         - name: server
-          image: gcr.io/my-first-project-236315/telepresence/gateway:latest
+          image: gcr.io/hogehoge/telepresence/gateway:latest
           ports:
             - containerPort: 50002
           livenessProbe:
